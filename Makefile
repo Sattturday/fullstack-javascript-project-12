@@ -1,6 +1,6 @@
 install:
-	npm install
-	cd frontend && npm install
+	npm ci
+	cd frontend && npm ci
 
 lint:
 	cd frontend && npm run lint
