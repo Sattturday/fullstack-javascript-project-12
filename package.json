@@ -1,10 +1,14 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
+  "private": true,
   "description": "[![Actions Status](https://github.com/Sattturday/fullstack-javascript-project-12/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Sattturday/fullstack-javascript-project-12/actions)",
-  "main": "index.js",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build --workspace=frontend",
+    "start": "npx start-server -s ./frontend/dist -p $PORT"
   },
   "repository": {
     "type": "git",
@@ -19,5 +23,8 @@
   "homepage": "https://github.com/Sattturday/fullstack-javascript-project-12#readme",
   "dependencies": {
     "@hexlet/chat-server": "^2.0.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
