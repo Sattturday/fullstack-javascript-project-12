@@ -1,34 +1,67 @@
+import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { logout } from '../store/authSlice'
+import { setMessages, addMessage, removeMessage } from '../store/messagesSlice'
+import { setChannels } from '../store/channelsSlice'
+import { setCurrentChannel } from '../store/uiSlice'
+
 import {
   useGetChannelsQuery,
   useGetMessagesQuery,
   useAddMessageMutation,
 } from '../services/api'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { logout } from '../store/authSlice'
-import { useState } from 'react'
+import socket from '../services/socket'
 
 const Home = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+
+  const { currentChannelId } = useSelector(state => state.ui)
+  const channels = useSelector(state => state.channels)
+  const messages = useSelector(state => state.messages)
+
   const [newMessage, setNewMessage] = useState('')
-  const [currentChannelId, setCurrentChannelId] = useState(1) // По умолчанию первый канал
 
   // Загрузка каналов
-  const {
-    data: channels = [],
-    isLoading: channelsLoading,
-    error: channelsError,
-  } = useGetChannelsQuery()
+  const { data: channelsData, isLoading: channelsLoading } = useGetChannelsQuery()
 
-  // Загрузка сообщений
-  const { data: messages = [], isLoading: messagesLoading }
-    = useGetMessagesQuery()
+  const { data: messagesData, isLoading: messagesLoading } = useGetMessagesQuery()
 
-  // Отправка сообщений
-  const [addMessage, { isLoading: sendingMessage }] = useAddMessageMutation()
+  const [sendMessage] = useAddMessageMutation()
 
-  // Фильтруем сообщения по текущему каналу
+  // сохраняем данные в redux
+  useEffect(() => {
+    if (channelsData) {
+      dispatch(setChannels(channelsData))
+    }
+  }, [channelsData])
+
+  useEffect(() => {
+    if (messagesData) {
+      dispatch(setMessages(messagesData))
+    }
+  }, [messagesData])
+
+  // открываем general по умолчанию
+  useEffect(() => {
+    if (channels.length && !currentChannelId) {
+      const general = channels.find(c => c.name === 'general')
+      dispatch(setCurrentChannel(general?.id || channels[0].id))
+    }
+  }, [channels, currentChannelId])
+
+  // socket listeners
+  useEffect(() => {
+    socket.on('newMessage', (message) => dispatch(addMessage(message)))
+    socket.on('removeMessage', (data) => dispatch(removeMessage(data)))
+
+    return () => {
+      socket.off('newMessage')
+      socket.off('removeMessage')
+    }
+  }, [])
+
   const currentMessages = messages.filter(
     msg => msg.channelId === currentChannelId,
   )
@@ -43,151 +76,132 @@ const Home = () => {
     if (!newMessage.trim()) return
 
     try {
-      // Из токена можно получить username, но для простоты используем временное имя
-      // В реальном проекте нужно декодировать JWT или сделать запрос на /me
-      const username = 'user' // Временное решение
-
-      await addMessage({
+      await sendMessage({
         text: newMessage,
         channelId: currentChannelId,
-        username,
+        username: 'user', // временно
       }).unwrap()
 
       setNewMessage('')
     }
     catch (error) {
-      console.error('Failed to send message:', error)
+      console.error(error)
     }
   }
 
   if (channelsLoading || messagesLoading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border text-primary">
-          <span className="visually-hidden">Загрузка...</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (channelsError) {
-    return (
-      <div
-        className="alert alert-danger m-3"
-        role="alert"
-      >
-        Ошибка загрузки:
-        {' '}
-        {channelsError.data?.message || channelsError.message}
-      </div>
-    )
+    return <div>Загрузка...</div>
   }
 
   return (
-    <div className="container-fluid vh-100 d-flex flex-column">
-      {/* Header с кнопкой выхода */}
-      <nav className="navbar navbar-expand navbar-dark bg-primary">
-        <div className="container-fluid">
+    <div className="d-flex flex-column h-100">
+      {/* Navbar */}
+      <nav className="shadow-sm navbar navbar-expand-lg navbar-light bg-white">
+        <div className="container">
           <span className="navbar-brand mb-0 h1">Hexlet Chat</span>
-          <div className="navbar-nav ms-auto">
-            <button
-              onClick={handleLogout}
-              className="btn btn-outline-light"
-              type="button"
-            >
-              Выйти
-            </button>
-          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleLogout}
+          >
+            Выйти
+          </button>
         </div>
       </nav>
 
-      <div className="row flex-grow-1 overflow-hidden">
-        {/* Список каналов */}
-        <div
-          className="col-3 border-end p-0 d-flex flex-column"
-          style={{ height: 'calc(100vh - 56px)' }}
-        >
-          <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">Каналы</h5>
-            <button className="btn btn-sm btn-primary">+</button>
+      {/* Main */}
+      <div className="container h-100 my-4 overflow-hidden rounded shadow">
+        <div className="row h-100 bg-white flex-md-row">
+          {/* Channels */}
+          <div className="col-4 col-md-2 border-end px-0 bg-light d-flex flex-column h-100">
+            <div className="d-flex justify-content-between align-items-center p-3">
+              <b>Каналы</b>
+            </div>
+
+            <ul className="nav flex-column nav-pills nav-fill px-2 mb-3 overflow-auto h-100 d-block">
+              {channels.map(channel => (
+                <li
+                  key={channel.id}
+                  className="nav-item w-100"
+                >
+                  <button
+                    type="button"
+                    onClick={() => dispatch(setCurrentChannel(channel.id))}
+                    className={`w-100 rounded-0 text-start btn ${currentChannelId === channel.id
+                      ? 'btn-secondary'
+                      : 'btn-light'
+                      }`}
+                  >
+                    <span className="me-1">#</span>
+                    {channel.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="list-group list-group-flush overflow-auto flex-grow-1">
-            {channels.map(channel => (
-              <button
-                key={channel.id}
-                onClick={() => setCurrentChannelId(channel.id)}
-                className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
-                  currentChannelId === channel.id ? 'active' : ''
-                }`}
-              >
-                #
-                {' '}
-                {channel.name}
-                <span className="badge bg-secondary rounded-pill">
-                  {messages.filter(m => m.channelId === channel.id).length}
+
+          {/* Messages */}
+          <div className="col p-0 h-100">
+            <div className="d-flex flex-column h-100">
+              {/* Header */}
+              <div className="bg-light mb-4 p-3 shadow-sm small">
+                <p className="m-0">
+                  <b># {channels.find(c => c.id === currentChannelId)?.name}</b>
+                </p>
+                <span className="text-muted">
+                  Всего сообщений: {currentMessages.length}
                 </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Область сообщений */}
-        <div
-          className="col-9 p-0 d-flex flex-column"
-          style={{ height: 'calc(100vh - 56px)' }}
-        >
-          {/* Заголовок канала */}
-          <div className="p-3 border-bottom">
-            <h5 className="mb-0">
-              #
-              {' '}
-              {channels.find(c => c.id === currentChannelId)?.name
-                || 'Выберите канал'}
-            </h5>
-          </div>
-
-          {/* Сообщения */}
-          <div
-            className="flex-grow-1 overflow-auto p-3"
-            style={{ maxHeight: 'calc(100vh - 200px)' }}
-          >
-            {currentMessages.map(msg => (
-              <div
-                key={msg.id}
-                className="mb-3"
-              >
-                <strong>
-                  {msg.username}
-                  :
-                </strong>
-                {' '}
-                {msg.text}
               </div>
-            ))}
-          </div>
 
-          {/* Форма отправки сообщения */}
-          <div className="p-3 border-top">
-            <form
-              onSubmit={handleSendMessage}
-              className="d-flex gap-2"
-            >
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Введите сообщение..."
-                value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
-                disabled={sendingMessage}
-              />
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={sendingMessage || !newMessage.trim()}
-              >
-                {sendingMessage ? 'Отправка...' : 'Отправить'}
-              </button>
-            </form>
+              {/* Messages list */}
+              <div className="chat-messages overflow-auto px-5 flex-grow-1">
+                {currentMessages.map(message => (
+                  <div key={message.id} className="text-break mb-2">
+                    <b>{message.username}</b>: {message.text}
+                  </div>
+                ))}
+              </div>
+
+              {/* Form */}
+              <div className="mt-auto px-5 py-3">
+                <form
+                  onSubmit={handleSendMessage}
+                  className="py-1 border rounded-2"
+                >
+                  <div className="input-group">
+                    <input
+                      name="body"
+                      value={newMessage}
+                      onChange={e => setNewMessage(e.target.value)}
+                      placeholder="Введите сообщение..."
+                      className="border-0 p-0 ps-2 form-control"
+                    />
+
+                    <button
+                      type="submit"
+                      disabled={!newMessage.trim()}
+                      className="btn btn-group-vertical"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                        className="bi bi-arrow-right-square"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"
+                        >
+                        </path>
+                      </svg>
+                      <span className="visually-hidden">Отправить</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       </div>

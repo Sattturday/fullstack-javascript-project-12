@@ -1,32 +1,38 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useNavigate, Link } from 'react-router-dom'
-import { useLoginMutation } from '../services/api'
-import { useState, useEffect } from 'react'
+import { useSignupMutation } from '../services/api'
+import { useState } from 'react'
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate()
-  const [login, { isLoading, error: rtkError }] = useLoginMutation()
+  const [signup, { isLoading, error: rtkError }] = useSignupMutation()
   const [submitError, setSubmitError] = useState(null)
-
-  useEffect(() => {
-    setSubmitError(null)
-  }, [submitError])
 
   const validate = (values) => {
     const errors = {}
 
     if (!values.username) {
       errors.username = 'Обязательное поле'
-    } else if (values.username.length < 3) {
+    }
+    else if (values.username.length < 3) {
       errors.username = 'Имя пользователя должно быть не менее 3 символов'
-    } else if (values.username.length > 20) {
+    }
+    else if (values.username.length > 20) {
       errors.username = 'Имя пользователя должно быть не более 20 символов'
     }
 
     if (!values.password) {
       errors.password = 'Обязательное поле'
-    } else if (values.password.length < 5) {
+    }
+    else if (values.password.length < 5) {
       errors.password = 'Пароль должен быть не менее 5 символов'
+    }
+
+    if (!values.confirmPassword) {
+      errors.confirmPassword = 'Обязательное поле'
+    }
+    else if (values.password !== values.confirmPassword) {
+      errors.confirmPassword = 'Пароли должны совпадать'
     }
 
     return errors
@@ -36,20 +42,29 @@ const Login = () => {
     try {
       setSubmitError(null) // Очищаем предыдущую ошибку
 
-      const result = await login(values).unwrap()
+      const result = await signup({
+        username: values.username,
+        password: values.password,
+      }).unwrap()
 
       if (result.token) {
-        navigate('/')
+        navigate('/login')
       }
-    } catch (err) {
+    }
+    catch (err) {
       // Обрабатываем разные форматы ошибок от сервера
-      let errorMessage = 'Ошибка авторизации'
+      let errorMessage = 'Ошибка регистрации'
 
-      if (err.data?.message) {
+      if (err.status === 409) {
+        errorMessage = 'Пользователь с таким именем уже существует'
+      }
+      else if (err.data?.message) {
         errorMessage = err.data.message
-      } else if (err.data?.error) {
+      }
+      else if (err.data?.error) {
         errorMessage = err.data.error
-      } else if (err.message) {
+      }
+      else if (err.message) {
         errorMessage = err.message
       }
 
@@ -60,13 +75,15 @@ const Login = () => {
           fieldErrors[key] = err.data.errors[key].join(', ')
         })
         setErrors(fieldErrors)
-      } else {
+      }
+      else {
         // Общая ошибка формы
         setSubmitError(errorMessage)
       }
 
-      console.error('Login failed:', err)
-    } finally {
+      console.error('Signup failed:', err)
+    }
+    finally {
       setSubmitting(false)
     }
   }
@@ -76,10 +93,10 @@ const Login = () => {
     if (submitError) return submitError
     if (rtkError) {
       return (
-        rtkError.data?.message ||
-        rtkError.data?.error ||
-        rtkError.message ||
-        'Ошибка подключения к серверу'
+        rtkError.data?.message
+        || rtkError.data?.error
+        || rtkError.message
+        || 'Ошибка подключения к серверу'
       )
     }
     return null
@@ -93,13 +110,17 @@ const Login = () => {
         <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
           <div className="card shadow-sm">
             <div className="card-body p-5">
-              <h1 className="text-center mb-4">Войти</h1>
+              <h1 className="text-center mb-4">Регистрация</h1>
 
               <Formik
-                initialValues={{ username: '', password: '' }}
+                initialValues={{
+                  username: '',
+                  password: '',
+                  confirmPassword: '',
+                }}
                 validate={validate}
                 onSubmit={handleSubmit}
-                validateOnChange={true}
+                validateOnChange={true} // Включаем живую валидацию
                 validateOnBlur={true}
               >
                 {({ isSubmitting, errors, touched, isValid, dirty }) => (
@@ -140,32 +161,49 @@ const Login = () => {
                           }`}
                       />
                       <label htmlFor="username">Ваш ник</label>
-                      {errors.username && touched.username && (
-                        <div className="invalid-feedback d-block">
-                          <ErrorMessage name="username" />
-                        </div>
-                      )}
+                      <div className="invalid-feedback">
+                        <ErrorMessage name="username" />
+                      </div>
                     </div>
 
                     {/* Поле password */}
-                    <div className="form-floating mb-4">
+                    <div className="form-floating mb-3">
                       <Field
                         type="password"
                         name="password"
                         id="password"
                         placeholder="Пароль"
-                        autoComplete="current-password"
+                        autoComplete="new-password"
                         className={`form-control ${errors.password && touched.password
                           ? 'is-invalid'
                           : ''
                           }`}
                       />
                       <label htmlFor="password">Пароль</label>
-                      {errors.password && touched.password && (
-                        <div className="invalid-feedback d-block">
-                          <ErrorMessage name="password" />
-                        </div>
-                      )}
+                      <div className="invalid-feedback">
+                        <ErrorMessage name="password" />
+                      </div>
+                    </div>
+
+                    {/* Поле confirmPassword */}
+                    <div className="form-floating mb-4">
+                      <Field
+                        type="password"
+                        name="confirmPassword"
+                        id="confirmPassword"
+                        placeholder="Подтвердите пароль"
+                        autoComplete="new-password"
+                        className={`form-control ${errors.confirmPassword && touched.confirmPassword
+                          ? 'is-invalid'
+                          : ''
+                          }`}
+                      />
+                      <label htmlFor="confirmPassword">
+                        Подтвердите пароль
+                      </label>
+                      <div className="invalid-feedback">
+                        <ErrorMessage name="confirmPassword" />
+                      </div>
                     </div>
 
                     {/* Кнопка отправки */}
@@ -174,14 +212,16 @@ const Login = () => {
                       className="w-100 mb-3 btn btn-outline-primary"
                       disabled={isSubmitting || isLoading || !isValid || !dirty}
                     >
-                      {isLoading || isSubmitting ? (
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        'Войти'
-                      )}
+                      {isLoading || isSubmitting
+                        ? (
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            aria-hidden="true"
+                          />
+                        )
+                        : (
+                          'Зарегистрироваться'
+                        )}
                     </button>
                   </Form>
                 )}
@@ -189,7 +229,9 @@ const Login = () => {
             </div>
 
             <div className="card-footer p-4 text-center">
-              <span>Нет аккаунта?</span> <Link to="/signup">Регистрация</Link>
+              <span>Уже есть аккаунт?</span>
+              {' '}
+              <Link to="/login">Войти</Link>
             </div>
           </div>
         </div>
@@ -198,4 +240,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Signup

@@ -29,6 +29,19 @@ export const api = createApi({
       },
     }),
 
+    // Регистрация
+    signup: builder.mutation({
+      query: credentials => ({
+        url: 'signup',
+        method: 'POST',
+        body: credentials,
+      }),
+      transformResponse: (response) => {
+        // При успешной регистрации перенаправляем на страницу логина
+        return response
+      },
+    }),
+
     // Каналы
     getChannels: builder.query({
       query: () => 'channels',
@@ -58,7 +71,7 @@ export const api = createApi({
         url: `channels/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Channels', 'Messages'], 
+      invalidatesTags: ['Channels', 'Messages'],
     }),
 
     // Сообщения
@@ -80,6 +93,7 @@ export const api = createApi({
 
 export const {
   useLoginMutation,
+  useSignupMutation,
   useGetChannelsQuery,
   useAddChannelMutation,
   useRenameChannelMutation,

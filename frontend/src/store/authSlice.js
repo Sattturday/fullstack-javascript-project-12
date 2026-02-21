@@ -6,12 +6,12 @@ const authSlice = createSlice({
     token: localStorage.getItem('token') || null,
   },
   reducers: {
-    logout: state => {
+    logout: (state) => {
       state.token = null
       localStorage.removeItem('token')
     },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder.addMatcher(
       action =>
         action.type?.startsWith('api/executeMutation') && action.payload?.token,
