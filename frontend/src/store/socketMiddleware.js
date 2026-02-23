@@ -5,6 +5,8 @@ import {
   renameChannel,
 } from './channelsSlice'
 import { setCurrentChannel } from './uiSlice'
+import { logout } from './authSlice'
+import { api } from '../services/api'
 
 export const createSocketMiddleware = (socket) => (store) => {
   socket.on('newMessage', (payload) => {
@@ -35,5 +37,24 @@ export const createSocketMiddleware = (socket) => (store) => {
     store.dispatch(renameChannel(payload))
   })
 
-  return (next) => (action) => next(action)
+  return (next) => (action) => {
+    const result = next(action)
+
+    // LOGIN SUCCESS
+    if (api.endpoints.login.matchFulfilled(action)) {
+      const token = localStorage.getItem('token')
+
+      if (token && !socket.connected) {
+        socket.auth = { token }
+        socket.connect()
+      }
+    }
+
+    // LOGOUT
+    if (logout.match(action)) {
+      socket.disconnect()
+    }
+
+    return result
+  }
 }

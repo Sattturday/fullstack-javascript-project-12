@@ -5,9 +5,15 @@ import { createAppStore } from './store'
 export default async function initApp() {
   const i18n = await createI18n()
   const socket = createSocket()
-  const store = createAppStore(socket)
 
-  socket.connect()
+  const token = localStorage.getItem('token')
+
+  if (token) {
+    socket.auth = { token }
+    socket.connect()
+  }
+
+  const store = createAppStore(socket)
 
   return { i18n, store }
 }
