@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import { setMessages, addMessage, removeChannelMessages } from '../store/messagesSlice'
 import { setChannels, addChannel, removeChannel, renameChannel } from '../store/channelsSlice'
 import { setCurrentChannel } from '../store/uiSlice'
@@ -14,7 +13,6 @@ import RemoveChannelModal from '../components/modals/RemoveChannelModal'
 
 const Home = () => {
   const dispatch = useDispatch()
-  const navigate = useNavigate()
 
   const { currentChannelId } = useSelector(state => state.ui)
   const channels = useSelector(state => state.channels)

@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getSignupSchema } from '../validation/signupSchema'
 import { useSignupMutation } from '../services/api'
 
 const Signup = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [signup, { isLoading }] = useSignupMutation()
   const [submitError, setSubmitError] = useState(null)
 
-  const schema = getSignupSchema()
+  const schema = getSignupSchema(t)
 
-  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
       setSubmitError(null)
 
@@ -23,13 +25,16 @@ const Signup = () => {
       if (result.token) {
         navigate('/')
       }
-    } catch (err) {
+    }
+    catch (err) {
       if (err.status === 409) {
-        setSubmitError('Такой пользователь уже существует')
-      } else {
-        setSubmitError('Ошибка соединения')
+        setSubmitError(t('errors.userExists'))
       }
-    } finally {
+      else {
+        setSubmitError(t('errors.connection'))
+      }
+    }
+    finally {
       setSubmitting(false)
     }
   }
@@ -40,7 +45,7 @@ const Signup = () => {
         <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
           <div className="card shadow-sm">
             <div className="card-body p-5">
-              <h1 className="text-center mb-4">Регистрация</h1>
+              <h1 className="text-center mb-4">{t('auth.signup')}</h1>
 
               <Formik
                 initialValues={{
@@ -68,21 +73,20 @@ const Signup = () => {
                       <Field
                         name="username"
                         id="username"
-                        placeholder="Ваш ник"
+                        placeholder={t('auth.username')}
                         autoComplete="username"
                         className={`form-control ${errors.username && touched.username ? 'is-invalid' : ''
-                          }`}
+                        }`}
                       />
-                      <label htmlFor="username">Ваш ник</label>
-                      <div
-                        className="invalid-feedback d-block"
-                        style={{ minHeight: '18px' }}
-                      >
-                        {errors.username && touched.username ? (
-                          <div className="invalid-feedback d-block">
-                            <ErrorMessage name="username" />
-                          </div>
-                        ) : null}
+                      <label htmlFor="username">{t('auth.username')}</label>
+                      <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
+                        {errors.username && touched.username
+                          ? (
+                              <div className="invalid-feedback d-block">
+                                <ErrorMessage name="username" />
+                              </div>
+                            )
+                          : null}
                       </div>
                     </div>
 
@@ -91,21 +95,20 @@ const Signup = () => {
                         type="password"
                         name="password"
                         id="password"
-                        placeholder="Пароль"
+                        placeholder={t('auth.password')}
                         autoComplete="new-password"
                         className={`form-control ${errors.password && touched.password ? 'is-invalid' : ''
-                          }`}
+                        }`}
                       />
-                      <label htmlFor="password">Пароль</label>
-                      <div
-                        className="invalid-feedback d-block"
-                        style={{ minHeight: '18px' }}
-                      >
-                        {errors.password && touched.password ? (
-                          <div className="invalid-feedback d-block">
-                            <ErrorMessage name="password" />
-                          </div>
-                        ) : null}
+                      <label htmlFor="password">{t('auth.password')}</label>
+                      <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
+                        {errors.password && touched.password
+                          ? (
+                              <div className="invalid-feedback d-block">
+                                <ErrorMessage name="password" />
+                              </div>
+                            )
+                          : null}
                       </div>
                     </div>
 
@@ -114,23 +117,24 @@ const Signup = () => {
                         type="password"
                         name="confirmPassword"
                         id="confirmPassword"
-                        placeholder="Подтвердите пароль"
+                        placeholder={t('auth.confirmPassword')}
                         autoComplete="new-password"
                         className={`form-control ${errors.confirmPassword && touched.confirmPassword
                           ? 'is-invalid'
                           : ''
-                          }`}
+                        }`}
                       />
-                      <label htmlFor="confirmPassword">Подтвердите пароль</label>
-                      <div
-                        className="invalid-feedback d-block"
-                        style={{ minHeight: '18px' }}
-                      >
-                        {errors.confirmPassword && touched.confirmPassword ? (
-                          <div className="invalid-feedback d-block">
-                            <ErrorMessage name="confirmPassword" />
-                          </div>
-                        ) : null}
+                      <label htmlFor="confirmPassword">
+                        {t('auth.confirmPassword')}
+                      </label>
+                      <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
+                        {errors.confirmPassword && touched.confirmPassword
+                          ? (
+                              <div className="invalid-feedback d-block">
+                                <ErrorMessage name="confirmPassword" />
+                              </div>
+                            )
+                          : null}
                       </div>
                     </div>
 
@@ -141,14 +145,14 @@ const Signup = () => {
                     >
                       {isLoading || isSubmitting
                         ? (
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            aria-hidden="true"
-                          />
-                        )
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              aria-hidden="true"
+                            />
+                          )
                         : (
-                          'Зарегистрироваться'
-                        )}
+                            t('auth.register')
+                          )}
                     </button>
                   </Form>
                 )}
@@ -156,9 +160,9 @@ const Signup = () => {
             </div>
 
             <div className="card-footer p-4 text-center">
-              <span>Уже есть аккаунт?</span>
+              <span>{t('auth.hasAccount')}</span>
               {' '}
-              <Link to="/login">Войти</Link>
+              <Link to="/login">{t('auth.login')}</Link>
             </div>
           </div>
         </div>

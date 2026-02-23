@@ -14,7 +14,7 @@ function App() {
       <Router>
         <div className="d-flex flex-column min-vh-100">
           <Header />
-          <main className="flex-grow-1 d-flex">
+          <main className="flex-grow-1 d-flex justify-content-center">
             <Routes>
               <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
               <Route path="/login" element={<Login />} />

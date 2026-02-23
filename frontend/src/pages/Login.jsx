@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getLoginSchema } from '../validation/loginSchema'
 import { useLoginMutation } from '../services/api'
 
 const Login = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [login, { isLoading }] = useLoginMutation()
   const [submitError, setSubmitError] = useState(null)
 
-  const schema = getLoginSchema()
+  const schema = getLoginSchema(t)
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -23,10 +25,10 @@ const Login = () => {
     }
     catch (err) {
       if (err.status === 401) {
-        setSubmitError('Неверные имя пользователя или пароль')
+        setSubmitError(t('errors.loginError'))
       }
       else {
-        setSubmitError('Ошибка соединения')
+        setSubmitError(t('errors.connection'))
       }
     }
     finally {
@@ -40,7 +42,7 @@ const Login = () => {
         <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
           <div className="card shadow-sm">
             <div className="card-body p-5">
-              <h1 className="text-center mb-4">Войти</h1>
+              <h1 className="text-center mb-4">{t('auth.login')}</h1>
 
               <Formik
                 initialValues={{ username: '', password: '' }}
@@ -64,19 +66,21 @@ const Login = () => {
                       <Field
                         name="username"
                         id="username"
-                        placeholder="Ваш ник"
+                        placeholder={t('auth.userNick')}
                         autoComplete="username"
                         className={`form-control ${errors.username && touched.username ? 'is-invalid' : ''
-                          }`}
+                        }`}
                       />
-                      <label htmlFor="username">Ваш ник</label>
+                      <label htmlFor="username">
+                        {t('auth.userNick')}
+                      </label>
                       <div
                         className="invalid-feedback d-block"
                         style={{ minHeight: '18px' }}
                       >
-                        {errors.username && touched.username ? (
-                          <ErrorMessage name="username" />
-                        ) : null}
+                        {errors.username && touched.username
+                          ? <ErrorMessage name="username" />
+                          : null}
                       </div>
                     </div>
 
@@ -85,21 +89,21 @@ const Login = () => {
                         type="password"
                         name="password"
                         id="password"
-                        placeholder="Пароль"
+                        placeholder={t('auth.password')}
                         autoComplete="current-password"
                         className={`form-control ${errors.password && touched.password ? 'is-invalid' : ''
-                          }`}
+                        }`}
                       />
-                      <label htmlFor="password">Пароль</label>
+                      <label htmlFor="password">
+                        {t('auth.password')}
+                      </label>
                       <div
                         className="invalid-feedback d-block mb-2"
                         style={{ minHeight: '18px' }}
                       >
-                        {errors.password && touched.password ? (
-                          <div className="invalid-feedback d-block">
-                            <ErrorMessage name="password" />
-                          </div>
-                        ) : null}
+                        {errors.password && touched.password
+                          ? <ErrorMessage name="password" />
+                          : null}
                       </div>
                     </div>
 
@@ -108,14 +112,16 @@ const Login = () => {
                       className="w-100 mb-3 btn btn-outline-primary"
                       disabled={isSubmitting || isLoading || !isValid || !dirty}
                     >
-                      {isLoading || isSubmitting ? (
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        'Войти'
-                      )}
+                      {isLoading || isSubmitting
+                        ? (
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              aria-hidden="true"
+                            />
+                          )
+                        : (
+                            t('auth.login')
+                          )}
                     </button>
                   </Form>
                 )}
@@ -123,7 +129,11 @@ const Login = () => {
             </div>
 
             <div className="card-footer p-4 text-center">
-              <span>Нет аккаунта?</span> <Link to="/signup">Регистрация</Link>
+              <span>{t('auth.noAccount')}</span>
+              {' '}
+              <Link to="/signup">
+                {t('auth.signup')}
+              </Link>
             </div>
           </div>
         </div>

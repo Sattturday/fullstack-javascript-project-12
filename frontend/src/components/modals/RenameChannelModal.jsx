@@ -1,10 +1,12 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { useTranslation } from 'react-i18next'
 import { useRenameChannelMutation } from '../../services/api'
 import { useSelector } from 'react-redux'
 import { getChannelSchema } from '../../validation/channelSchema'
 import PropTypes from 'prop-types'
 
 const RenameChannelModal = ({ channel, onClose }) => {
+  const { t } = useTranslation()
   const channels = useSelector(state => state.channels)
   const [renameChannel] = useRenameChannelMutation()
 
@@ -32,7 +34,7 @@ const RenameChannelModal = ({ channel, onClose }) => {
             {({ isSubmitting }) => (
               <Form>
                 <div className="modal-header">
-                  <h5 className="modal-title">Переименовать</h5>
+                  <h5 className="modal-title">{t('channels.rename')}</h5>
                   <button type="button" className="btn-close" onClick={onClose} />
                 </div>
 
@@ -42,19 +44,21 @@ const RenameChannelModal = ({ channel, onClose }) => {
                     autoFocus
                     className="form-control"
                   />
-                  <ErrorMessage
-                    name="name"
-                    component="div"
-                    className="text-danger small"
-                  />
+                  <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      className="text-danger small"
+                    />
+                  </div>
                 </div>
 
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={onClose}>
-                    Отменить
+                    {t('channels.cancel')}
                   </button>
                   <button type="submit" disabled={isSubmitting} className="btn btn-primary">
-                    Отправить
+                    {t('channels.send')}
                   </button>
                 </div>
               </Form>

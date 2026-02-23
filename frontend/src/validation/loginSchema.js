@@ -1,13 +1,13 @@
 import * as yup from 'yup'
 
-export const getLoginSchema = () =>
+export const getLoginSchema = t =>
   yup.object().shape({
     username: yup.string()
-      .min(3, 'От 3 до 20 символов')
-      .max(20, 'От 3 до 20 символов')
-      .required('Обязательное поле'),
+      .min(3, t('validation.usernameRange'))
+      .max(20, t('validation.usernameRange'))
+      .required(t('validation.required')),
 
     password: yup.string()
-      .min(6, 'Не менее 6 символов')
-      .required('Обязательное поле'),
+      .min(6, t('validation.passwordMin'))
+      .required(t('validation.required')),
   })

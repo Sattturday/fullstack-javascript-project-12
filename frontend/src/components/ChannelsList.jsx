@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Dropdown, ButtonGroup } from 'react-bootstrap'
+import { useTranslation } from 'react-i18next'
 import { setCurrentChannel } from '../store/uiSlice'
 import PropTypes from 'prop-types'
 
@@ -8,6 +9,7 @@ const ChannelsList = ({
   onRenameChannel,
   onRemoveChannel,
 }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const channels = useSelector(state => state.channels)
   const currentChannelId = useSelector(state => state.ui.currentChannelId)
@@ -15,7 +17,7 @@ const ChannelsList = ({
   return (
     <div className="col-4 col-md-2 border-end px-0 bg-light d-flex flex-column h-100">
       <div className="d-flex gap-2 justify-content-between align-items-center mb-2 p-2 pt-4 pb-4">
-        <b>Каналы</b>
+        <b>{t('channels.title')}</b>
 
         <button
           type="button"
@@ -58,7 +60,7 @@ const ChannelsList = ({
                   id={`dropdown-${channel.id}`}
                 >
                   <span className="visually-hidden">
-                    Управление каналом
+                    {t('channels.manage')}
                   </span>
                 </Dropdown.Toggle>
 
@@ -66,12 +68,12 @@ const ChannelsList = ({
                   <Dropdown.Item
                     onClick={() => onRemoveChannel(channel)}
                   >
-                    Удалить
+                    {t('channels.remove')}
                   </Dropdown.Item>
                   <Dropdown.Item
                     onClick={() => onRenameChannel(channel)}
                   >
-                    Переименовать
+                    {t('channels.rename')}
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

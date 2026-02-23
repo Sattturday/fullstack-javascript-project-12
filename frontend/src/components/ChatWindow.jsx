@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { useAddMessageMutation } from '../services/api'
 
 const ChatWindow = () => {
+  const { t } = useTranslation()
   const [text, setText] = useState('')
   const currentChannelId = useSelector(state => state.ui.currentChannelId)
   const channels = useSelector(state => state.channels)
@@ -29,6 +31,19 @@ const ChatWindow = () => {
     setText('')
   }
 
+  const formatMessageCount = (count) => {
+    const remainder10 = count % 10
+    const remainder100 = count % 100
+
+    if (remainder10 === 1 && remainder100 !== 11) {
+      return `${count} ${t('chat.messages.one')}`
+    }
+    if (remainder10 >= 2 && remainder10 <= 4 && (remainder100 < 12 || remainder100 > 14)) {
+      return `${count} ${t('chat.messages.few')}`
+    }
+    return `${count} ${t('chat.messages.many')}`
+  }
+
   return (
     <div className="col p-0 h-100">
       <div className="d-flex flex-column h-100">
@@ -39,9 +54,7 @@ const ChatWindow = () => {
             <b>{`# ${currentChannel?.name}`}</b>
           </p>
           <span className="text-muted">
-            Всего сообщений:
-            {' '}
-            {currentMessages.length}
+            {formatMessageCount(currentMessages.length)}
           </span>
         </div>
 
@@ -66,7 +79,7 @@ const ChatWindow = () => {
               <input
                 value={text}
                 onChange={e => setText(e.target.value)}
-                placeholder="Введите сообщение..."
+                placeholder={t('chat.input.placeholder')}
                 className="border-0 p-0 ps-2 form-control"
               />
               <button
@@ -79,7 +92,7 @@ const ChatWindow = () => {
                   style={{ fontSize: '20px' }}
                 >
                 </i>
-                <span className="visually-hidden">Отправить</span>
+                <span className="visually-hidden">{t('chat.send')}</span>
               </button>
             </div>
           </form>

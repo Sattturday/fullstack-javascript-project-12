@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { useRemoveChannelMutation } from '../../services/api'
 import { useDispatch } from 'react-redux'
 import { setCurrentChannel } from '../../store/uiSlice'
 import { removeChannelMessages } from '../../store/messagesSlice'
 
 const RemoveChannelModal = ({ channel, defaultChannelId, onClose }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const [removeChannel, { isLoading }] = useRemoveChannelMutation()
 
@@ -20,17 +22,17 @@ const RemoveChannelModal = ({ channel, defaultChannelId, onClose }) => {
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Удалить канал</h5>
+            <h5 className="modal-title">{t('channels.remove')}</h5>
             <button type="button" className="btn-close" onClick={onClose} />
           </div>
 
           <div className="modal-body">
-            Уверены?
+            {t('channels.confirmRemove')}
           </div>
 
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Отменить
+              {t('channels.cancel')}
             </button>
             <button
               type="button"
@@ -38,7 +40,7 @@ const RemoveChannelModal = ({ channel, defaultChannelId, onClose }) => {
               className="btn btn-danger"
               onClick={handleRemove}
             >
-              Удалить
+              {t('channels.delete')}
             </button>
           </div>
         </div>

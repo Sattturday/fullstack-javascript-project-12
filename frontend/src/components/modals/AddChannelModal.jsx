@@ -1,16 +1,18 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { useAddChannelMutation } from '../../services/api'
 import { setCurrentChannel } from '../../store/uiSlice'
 import { getChannelSchema } from '../../validation/channelSchema'
 
 const AddChannelModal = ({ onClose }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const channels = useSelector(state => state.channels)
   const [addChannel] = useAddChannelMutation()
 
-  const schema = getChannelSchema(channels)
+  const schema = getChannelSchema(t, channels)
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -35,7 +37,7 @@ const AddChannelModal = ({ onClose }) => {
             {({ isSubmitting }) => (
               <Form>
                 <div className="modal-header">
-                  <h5 className="modal-title">Имя канала</h5>
+                  <h5 className="modal-title">{t('channels.create')}</h5>
                   <button type="button" className="btn-close" onClick={onClose} />
                 </div>
 
@@ -45,11 +47,13 @@ const AddChannelModal = ({ onClose }) => {
                     autoFocus
                     className="form-control"
                   />
-                  <ErrorMessage
-                    name="name"
-                    component="div"
-                    className="text-danger small"
-                  />
+                  <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      className="text-danger small"
+                    />
+                  </div>
                 </div>
 
                 <div className="modal-footer">
@@ -58,14 +62,14 @@ const AddChannelModal = ({ onClose }) => {
                     className="btn btn-secondary"
                     onClick={onClose}
                   >
-                    Отменить
+                    {t('channels.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="btn btn-primary"
                   >
-                    Отправить
+                    {t('channels.send')}
                   </button>
                 </div>
               </Form>
