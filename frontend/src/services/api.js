@@ -1,17 +1,32 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import socket from '../services/socket'
+import { logout } from '../store/authSlice'
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: '/api/v1',
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`)
+    }
+    return headers
+  },
+})
+
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  const result = await baseQuery(args, api, extraOptions)
+
+  if (result.error?.status === 401) {
+    socket.disconnect()
+    api.dispatch(logout())
+  }
+
+  return result
+}
 
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/v1',
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth.token
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`)
-      }
-      return headers
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Channels', 'Messages'],
   endpoints: builder => ({
     // Аутентификация

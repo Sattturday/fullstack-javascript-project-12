@@ -22,7 +22,10 @@
   },
   "homepage": "https://github.com/Sattturday/fullstack-javascript-project-12#readme",
   "dependencies": {
-    "@hexlet/chat-server": "^2.0.4"
+    "@hexlet/chat-server": "^2.0.4",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "react-bootstrap": "^2.10.10"
   },
   "engines": {
     "node": ">=20.0.0"
