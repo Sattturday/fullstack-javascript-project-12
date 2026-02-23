@@ -39,7 +39,9 @@ const ChatWindow = () => {
             <b>{`# ${currentChannel?.name}`}</b>
           </p>
           <span className="text-muted">
-            Всего сообщений: {currentMessages.length}
+            Всего сообщений:
+            {' '}
+            {currentMessages.length}
           </span>
         </div>
 
@@ -47,7 +49,9 @@ const ChatWindow = () => {
         <div className="overflow-auto px-5 flex-grow-1">
           {currentMessages.map(message => (
             <div key={message.id} className="text-break mb-2">
-              <b>{message.username}</b>: {message.text}
+              <b>{message.username}</b>
+              :
+              {message.text}
             </div>
           ))}
         </div>

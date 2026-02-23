@@ -1,94 +1,41 @@
+import { useState } from 'react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useNavigate, Link } from 'react-router-dom'
+import { getLoginSchema } from '../validation/loginSchema'
 import { useLoginMutation } from '../services/api'
-import { useState, useEffect } from 'react'
 
 const Login = () => {
   const navigate = useNavigate()
-  const [login, { isLoading, error: rtkError }] = useLoginMutation()
+  const [login, { isLoading }] = useLoginMutation()
   const [submitError, setSubmitError] = useState(null)
 
-  useEffect(() => {
-    setSubmitError(null)
-  }, [submitError])
+  const schema = getLoginSchema()
 
-  const validate = (values) => {
-    const errors = {}
-
-    if (!values.username) {
-      errors.username = 'Обязательное поле'
-    } else if (values.username.length < 3) {
-      errors.username = 'Имя пользователя должно быть не менее 3 символов'
-    } else if (values.username.length > 20) {
-      errors.username = 'Имя пользователя должно быть не более 20 символов'
-    }
-
-    if (!values.password) {
-      errors.password = 'Обязательное поле'
-    } else if (values.password.length < 5) {
-      errors.password = 'Пароль должен быть не менее 5 символов'
-    }
-
-    return errors
-  }
-
-  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      setSubmitError(null) // Очищаем предыдущую ошибку
+      setSubmitError(null)
 
       const result = await login(values).unwrap()
 
       if (result.token) {
         navigate('/')
       }
-    } catch (err) {
-      // Обрабатываем разные форматы ошибок от сервера
-      let errorMessage = 'Ошибка авторизации'
-
-      if (err.data?.message) {
-        errorMessage = err.data.message
-      } else if (err.data?.error) {
-        errorMessage = err.data.error
-      } else if (err.message) {
-        errorMessage = err.message
+    }
+    catch (err) {
+      if (err.status === 401) {
+        setSubmitError('Неверные имя пользователя или пароль')
       }
-
-      // Если сервер вернул ошибки валидации для конкретных полей
-      if (err.data?.errors) {
-        const fieldErrors = {}
-        Object.keys(err.data.errors).forEach((key) => {
-          fieldErrors[key] = err.data.errors[key].join(', ')
-        })
-        setErrors(fieldErrors)
-      } else {
-        // Общая ошибка формы
-        setSubmitError(errorMessage)
+      else {
+        setSubmitError('Ошибка соединения')
       }
-
-      console.error('Login failed:', err)
-    } finally {
+    }
+    finally {
       setSubmitting(false)
     }
   }
 
-  // Функция для получения текста ошибки
-  const getErrorMessage = () => {
-    if (submitError) return submitError
-    if (rtkError) {
-      return (
-        rtkError.data?.message ||
-        rtkError.data?.error ||
-        rtkError.message ||
-        'Ошибка подключения к серверу'
-      )
-    }
-    return null
-  }
-
-  const errorMessage = getErrorMessage()
-
   return (
-    <div className="container vh-100 d-flex align-items-center justify-content-center">
+    <div className="container flex-grow-1 d-flex align-items-center justify-content-center">
       <div className="row justify-content-center w-100">
         <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
           <div className="card shadow-sm">
@@ -97,57 +44,42 @@ const Login = () => {
 
               <Formik
                 initialValues={{ username: '', password: '' }}
-                validate={validate}
+                validationSchema={schema}
                 onSubmit={handleSubmit}
-                validateOnChange={true}
-                validateOnBlur={true}
               >
                 {({ isSubmitting, errors, touched, isValid, dirty }) => (
                   <Form>
-                    {/* Блок с ошибкой фиксированной высоты */}
-                    <div
-                      className="mb-3"
-                      style={{ minHeight: '58px' }}
-                    >
-                      {errorMessage && (
+                    <div className="mb-3">
+                      {submitError && (
                         <div
                           className="alert alert-danger alert-dismissible fade show py-2"
                           role="alert"
                         >
-                          <small>{errorMessage}</small>
-                          <button
-                            type="button"
-                            className="btn-close btn-sm"
-                            onClick={() => {
-                              setSubmitError(null)
-                            }}
-                            aria-label="Close"
-                          />
+                          <small>{submitError}</small>
                         </div>
                       )}
                     </div>
 
-                    {/* Поле username */}
-                    <div className="form-floating mb-3">
+                    <div className="form-floating mb-2">
                       <Field
                         name="username"
                         id="username"
                         placeholder="Ваш ник"
                         autoComplete="username"
-                        className={`form-control ${errors.username && touched.username
-                          ? 'is-invalid'
-                          : ''
+                        className={`form-control ${errors.username && touched.username ? 'is-invalid' : ''
                           }`}
                       />
                       <label htmlFor="username">Ваш ник</label>
-                      {errors.username && touched.username && (
-                        <div className="invalid-feedback d-block">
+                      <div
+                        className="invalid-feedback d-block"
+                        style={{ minHeight: '18px' }}
+                      >
+                        {errors.username && touched.username ? (
                           <ErrorMessage name="username" />
-                        </div>
-                      )}
+                        ) : null}
+                      </div>
                     </div>
 
-                    {/* Поле password */}
                     <div className="form-floating mb-4">
                       <Field
                         type="password"
@@ -155,20 +87,22 @@ const Login = () => {
                         id="password"
                         placeholder="Пароль"
                         autoComplete="current-password"
-                        className={`form-control ${errors.password && touched.password
-                          ? 'is-invalid'
-                          : ''
+                        className={`form-control ${errors.password && touched.password ? 'is-invalid' : ''
                           }`}
                       />
                       <label htmlFor="password">Пароль</label>
-                      {errors.password && touched.password && (
-                        <div className="invalid-feedback d-block">
-                          <ErrorMessage name="password" />
-                        </div>
-                      )}
+                      <div
+                        className="invalid-feedback d-block mb-2"
+                        style={{ minHeight: '18px' }}
+                      >
+                        {errors.password && touched.password ? (
+                          <div className="invalid-feedback d-block">
+                            <ErrorMessage name="password" />
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
 
-                    {/* Кнопка отправки */}
                     <button
                       type="submit"
                       className="w-100 mb-3 btn btn-outline-primary"

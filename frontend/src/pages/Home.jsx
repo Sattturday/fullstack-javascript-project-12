@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { logout } from '../store/authSlice'
 import { setMessages, addMessage, removeChannelMessages } from '../store/messagesSlice'
 import { setChannels, addChannel, removeChannel, renameChannel } from '../store/channelsSlice'
 import { setCurrentChannel } from '../store/uiSlice'
@@ -19,7 +18,6 @@ const Home = () => {
 
   const { currentChannelId } = useSelector(state => state.ui)
   const channels = useSelector(state => state.channels)
-
 
   const { data: channelsData } = useGetChannelsQuery()
   const { data: messagesData } = useGetMessagesQuery()
@@ -81,30 +79,8 @@ const Home = () => {
     }
   }, [dispatch, currentChannelId, channels])
 
-  const handleLogout = () => {
-    socket.disconnect()
-    dispatch(logout())
-    navigate('/login')
-  }
-
   return (
-    <div className="d-flex flex-column h-100">
-
-      {/* Navbar */}
-      <nav className="shadow-sm navbar navbar-expand-lg navbar-light bg-white">
-        <div className="container">
-          <span className="navbar-brand mb-0 h1">Hexlet Chat</span>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleLogout}
-          >
-            Выйти
-          </button>
-        </div>
-      </nav>
-
-      {/* Основной контент */}
+    <div className="container flex-grow-1 d-flex align-items-center justify-content-center">
       <div className="container h-100 my-4 overflow-hidden rounded shadow">
         <div className="row h-100 bg-white flex-md-row">
           <ChannelsList

@@ -14,7 +14,7 @@ const ChannelsList = ({
 
   return (
     <div className="col-4 col-md-2 border-end px-0 bg-light d-flex flex-column h-100">
-      <div className="d-flex mt-1 justify-content-between align-items-center mb-2 ps-4 pe-2 p-4">
+      <div className="d-flex gap-2 justify-content-between align-items-center mb-2 p-2 pt-4 pb-4">
         <b>Каналы</b>
 
         <button

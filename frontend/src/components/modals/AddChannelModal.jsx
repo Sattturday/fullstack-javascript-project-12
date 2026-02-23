@@ -1,9 +1,9 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
-import { useAddChannelMutation } from '../../services/api'
 import { useDispatch, useSelector } from 'react-redux'
+import PropTypes from 'prop-types'
+import { useAddChannelMutation } from '../../services/api'
 import { setCurrentChannel } from '../../store/uiSlice'
 import { getChannelSchema } from '../../validation/channelSchema'
-import PropTypes from 'prop-types'
 
 const AddChannelModal = ({ onClose }) => {
   const dispatch = useDispatch()
