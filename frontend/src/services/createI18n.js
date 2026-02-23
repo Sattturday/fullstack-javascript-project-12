@@ -1,4 +1,4 @@
-import i18n from 'i18next'
+import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
 const resources = {
@@ -49,6 +49,7 @@ const resources = {
         cancel: 'Отменить',
         send: 'Отправить',
         delete: 'Удалить',
+        edit: 'Переименовать',
         created: 'Канал создан',
         renamed: 'Канал переименован',
         removed: 'Канал удалён',
@@ -66,15 +67,19 @@ const resources = {
   },
 }
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'ru',
-    fallbackLng: 'ru',
-    interpolation: {
-      escapeValue: false,
-    },
-  })
+export default async function createI18n() {
+  const instance = i18next.createInstance()
 
-export default i18n
+  await instance
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: 'ru',
+      fallbackLng: 'ru',
+      interpolation: {
+        escapeValue: false,
+      },
+    })
+
+  return instance
+}

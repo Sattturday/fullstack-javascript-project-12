@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import socket from '../services/socket'
 import { logout } from '../store/authSlice'
 
 const Header = () => {
@@ -11,7 +10,6 @@ const Header = () => {
   const token = useSelector(state => state.auth.token)
 
   const handleLogout = () => {
-    socket.disconnect()
     dispatch(logout())
     navigate('/login')
   }

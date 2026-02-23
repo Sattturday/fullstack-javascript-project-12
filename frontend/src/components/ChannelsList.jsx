@@ -68,12 +68,12 @@ const ChannelsList = ({
                   <Dropdown.Item
                     onClick={() => onRemoveChannel(channel)}
                   >
-                    {t('channels.remove')}
+                    {t('channels.delete')}
                   </Dropdown.Item>
                   <Dropdown.Item
                     onClick={() => onRenameChannel(channel)}
                   >
-                    {t('channels.rename')}
+                    {t('channels.edit')}
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

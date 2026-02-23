@@ -10,7 +10,7 @@ const RenameChannelModal = ({ channel, onClose }) => {
   const channels = useSelector(state => state.channels)
   const [renameChannel] = useRenameChannelMutation()
 
-  const schema = getChannelSchema(channels, channel.id)
+  const schema = getChannelSchema(t, channels, channel.id)
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
