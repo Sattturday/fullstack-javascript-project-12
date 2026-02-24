@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import { setMessages } from '../store/messagesSlice'
 import { setChannels } from '../store/channelsSlice'
 import { setCurrentChannel } from '../store/uiSlice'
@@ -11,15 +13,22 @@ import RenameChannelModal from '../components/modals/RenameChannelModal'
 import RemoveChannelModal from '../components/modals/RemoveChannelModal'
 
 const Home = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
 
   const { currentChannelId } = useSelector(state => state.ui)
   const channels = useSelector(state => state.channels)
 
-  const { data: channelsData } = useGetChannelsQuery()
-  const { data: messagesData } = useGetMessagesQuery()
+  const { data: channelsData, error: channelsError } = useGetChannelsQuery()
+  const { data: messagesData, error: messagesError } = useGetMessagesQuery()
 
   const [modal, setModal] = useState(null)
+
+  useEffect(() => {
+    if (channelsError || messagesError) {
+      toast.error(t('errors.connection'))
+    }
+  }, [channelsError, messagesError, t])
 
   useEffect(() => {
     if (channelsData) dispatch(setChannels(channelsData))

@@ -2,6 +2,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-toastify'
 import { useAddChannelMutation } from '../../services/api'
 import { setCurrentChannel } from '../../store/uiSlice'
 import { getChannelSchema } from '../../validation/channelSchema'
@@ -17,8 +18,12 @@ const AddChannelModal = ({ onClose }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const channel = await addChannel(values).unwrap()
+      toast.success(t('channels.created'))
       dispatch(setCurrentChannel(channel.id))
       onClose()
+    }
+    catch (e) {
+      console.error('Error adding channel:', e)
     }
     finally {
       setSubmitting(false)

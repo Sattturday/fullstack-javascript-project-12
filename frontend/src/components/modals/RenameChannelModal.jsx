@@ -1,7 +1,8 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useTranslation } from 'react-i18next'
-import { useRenameChannelMutation } from '../../services/api'
 import { useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import { useRenameChannelMutation } from '../../services/api'
 import { getChannelSchema } from '../../validation/channelSchema'
 import PropTypes from 'prop-types'
 
@@ -15,7 +16,11 @@ const RenameChannelModal = ({ channel, onClose }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       await renameChannel({ id: channel.id, name: values.name }).unwrap()
+      toast.success(t('channels.renamed'))
       onClose()
+    }
+    catch (e) {
+      console.error('Error renaming channel:', e)
     }
     finally {
       setSubmitting(false)
