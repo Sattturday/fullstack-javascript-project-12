@@ -38,6 +38,9 @@ export const api = createApi({
         if (response.token) {
           localStorage.setItem('token', response.token)
         }
+        if (response.username) {
+          localStorage.setItem('username', response.username)
+        }
         return response
       },
     }),
@@ -50,7 +53,12 @@ export const api = createApi({
         body: credentials,
       }),
       transformResponse: (response) => {
-        // При успешной регистрации перенаправляем на страницу логина
+        if (response.token) {
+          localStorage.setItem('token', response.token)
+        }
+        if (response.username) {
+          localStorage.setItem('username', response.username)
+        }
         return response
       },
     }),

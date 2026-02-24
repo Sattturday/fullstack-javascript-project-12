@@ -10,6 +10,7 @@ const ChatWindow = () => {
   const currentChannelId = useSelector(state => state.ui.currentChannelId)
   const channels = useSelector(state => state.channels)
   const messages = useSelector(state => state.messages)
+  const username = useSelector(state => state.auth.username)
 
   const [sendMessage] = useAddMessageMutation()
 
@@ -28,7 +29,7 @@ const ChatWindow = () => {
     await sendMessage({
       text: cleanedText,
       channelId: currentChannelId,
-      username: 'user',
+      username: username || 'user',
     })
 
     setText('')
@@ -67,6 +68,7 @@ const ChatWindow = () => {
             <div key={message.id} className="text-break mb-2">
               <b>{message.username}</b>
               :
+              {' '}
               {message.text}
             </div>
           ))}
