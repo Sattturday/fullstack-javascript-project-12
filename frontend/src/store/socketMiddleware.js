@@ -8,7 +8,7 @@ import { setCurrentChannel } from './uiSlice'
 import { logout } from './authSlice'
 import { api } from '../services/api'
 
-export const createSocketMiddleware = (socket) => (store) => {
+export const createSocketMiddleware = socket => (store) => {
   socket.on('newMessage', (payload) => {
     store.dispatch(addMessage(payload))
   })
@@ -28,7 +28,7 @@ export const createSocketMiddleware = (socket) => (store) => {
     if (currentChannelId === id) {
       const general = channels.find(c => c.name === 'general')
       store.dispatch(
-        setCurrentChannel(general?.id || channels[0]?.id)
+        setCurrentChannel(general?.id || channels[0]?.id),
       )
     }
   })
@@ -37,7 +37,7 @@ export const createSocketMiddleware = (socket) => (store) => {
     store.dispatch(renameChannel(payload))
   })
 
-  return (next) => (action) => {
+  return next => (action) => {
     const result = next(action)
 
     // LOGIN SUCCESS

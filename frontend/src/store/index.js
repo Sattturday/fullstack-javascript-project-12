@@ -6,7 +6,7 @@ import uiReducer from './uiSlice'
 import { api } from '../services/api'
 import { createSocketMiddleware } from './socketMiddleware'
 
-export const createAppStore = (socket) =>
+export const createAppStore = socket =>
   configureStore({
     reducer: {
       auth: authReducer,
@@ -15,7 +15,7 @@ export const createAppStore = (socket) =>
       ui: uiReducer,
       [api.reducerPath]: api.reducer,
     },
-    middleware: (getDefaultMiddleware) =>
+    middleware: getDefaultMiddleware =>
       getDefaultMiddleware()
         .concat(api.middleware)
         .concat(createSocketMiddleware(socket)),

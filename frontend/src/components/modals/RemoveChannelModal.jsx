@@ -18,7 +18,8 @@ const RemoveChannelModal = ({ channel, defaultChannelId, onClose }) => {
       dispatch(removeChannelMessages(channel.id))
       dispatch(setCurrentChannel(defaultChannelId))
       onClose()
-    } catch (e) {
+    }
+    catch (e) {
       console.error('Error removing channel:', e)
     }
   }

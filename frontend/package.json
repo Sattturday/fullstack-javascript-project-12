@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@rollbar/react": "^1.0.0",
     "axios": "^1.13.4",
     "bootstrap": "^5.3.8",
     "formik": "^2.4.9",
