@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import leoProfanity from 'leo-profanity'
 import { useAddMessageMutation } from '../services/api'
 
 const ChatWindow = () => {
@@ -20,10 +21,12 @@ const ChatWindow = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!text.trim()) return
+
+    const cleanedText = leoProfanity.clean(text).trim()
+    if (!cleanedText) return
 
     await sendMessage({
-      text,
+      text: cleanedText,
       channelId: currentChannelId,
       username: 'user',
     })
