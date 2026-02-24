@@ -1,6 +1,5 @@
 install:
 	npm ci
-	cd frontend && npm ci
 
 lint:
 	cd frontend && npm run lint
@@ -13,4 +12,4 @@ build:
 	cd frontend && npm run build
 
 start:
-	npx start-server -s ./frontend/dist
+	npm start
