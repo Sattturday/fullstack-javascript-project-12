@@ -56,7 +56,7 @@ const Signup = () => {
                 validationSchema={schema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting, errors, touched, isValid, dirty }) => (
+                {({ isSubmitting, errors, touched }) => (
                   <Form>
                     <div className="mb-3">
                       {submitError && (
@@ -141,7 +141,7 @@ const Signup = () => {
                     <button
                       type="submit"
                       className="w-100 mb-3 btn btn-outline-primary"
-                      disabled={isSubmitting || isLoading || !isValid || !dirty}
+                      disabled={isSubmitting || isLoading }
                     >
                       {isLoading || isSubmitting
                         ? (

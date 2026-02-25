@@ -49,7 +49,7 @@ const Login = () => {
                 validationSchema={schema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting, errors, touched, isValid, dirty }) => (
+                {({ isSubmitting, errors, touched }) => (
                   <Form>
                     <div className="mb-3">
                       {submitError && (
@@ -69,7 +69,7 @@ const Login = () => {
                         placeholder={t('auth.userNick')}
                         autoComplete="username"
                         className={`form-control ${errors.username && touched.username ? 'is-invalid' : ''
-                        }`}
+                          }`}
                       />
                       <label htmlFor="username">
                         {t('auth.userNick')}
@@ -92,7 +92,7 @@ const Login = () => {
                         placeholder={t('auth.password')}
                         autoComplete="current-password"
                         className={`form-control ${errors.password && touched.password ? 'is-invalid' : ''
-                        }`}
+                          }`}
                       />
                       <label htmlFor="password">
                         {t('auth.password')}
@@ -110,18 +110,18 @@ const Login = () => {
                     <button
                       type="submit"
                       className="w-100 mb-3 btn btn-outline-primary"
-                      disabled={isSubmitting || isLoading || !isValid || !dirty}
+                      disabled={isSubmitting || isLoading }
                     >
                       {isLoading || isSubmitting
                         ? (
-                            <span
-                              className="spinner-border spinner-border-sm me-2"
-                              aria-hidden="true"
-                            />
-                          )
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            aria-hidden="true"
+                          />
+                        )
                         : (
-                            t('auth.login')
-                          )}
+                          t('auth.login')
+                        )}
                     </button>
                   </Form>
                 )}
