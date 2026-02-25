@@ -13,3 +13,6 @@ build:
 
 start:
 	npm start
+
+test:
+	echo no tests
