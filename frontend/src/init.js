@@ -7,12 +7,16 @@ import Rollbar from 'rollbar'
 export default async function initApp() {
   const i18n = await createI18n()
 
-  const rollbar = new Rollbar({
-    accessToken: import.meta.env.VITE_ROLLBAR_TOKEN,
-    environment: import.meta.env.MODE,
-    captureUncaught: true,
-    captureUnhandledRejections: true,
-  })
+  let rollbar = null
+
+  if (import.meta.env.VITE_ROLLBAR_TOKEN) {
+    rollbar = new Rollbar({
+      accessToken: import.meta.env.VITE_ROLLBAR_TOKEN,
+      environment: import.meta.env.MODE,
+      captureUncaught: true,
+      captureUnhandledRejections: true,
+    })
+  }
 
   const socket = createSocket()
 

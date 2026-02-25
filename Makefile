@@ -12,7 +12,7 @@ build:
 	cd frontend && npm run build
 
 start:
-	npm start
+	npx start-server -s ./frontend/dist
 
 test:
 	echo no tests
