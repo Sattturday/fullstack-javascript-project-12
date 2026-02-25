@@ -86,6 +86,7 @@ const ChatWindow = () => {
                 onChange={e => setText(e.target.value)}
                 placeholder={t('chat.input.placeholder')}
                 className="border-0 p-0 ps-2 form-control"
+                aria-label={t('chat.input.ariaLabel')}
               />
               <button
                 type="submit"

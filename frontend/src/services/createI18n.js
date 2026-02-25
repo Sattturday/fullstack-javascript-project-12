@@ -37,6 +37,7 @@ const resources = {
         },
         input: {
           placeholder: 'Введите сообщение...',
+          ariaLabel: 'Новое сообщение',
         },
       },
       channels: {
