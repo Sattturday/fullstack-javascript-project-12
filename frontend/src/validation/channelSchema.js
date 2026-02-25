@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import leoProfanity from 'leo-profanity'
+// import leoProfanity from 'leo-profanity'
 
 export const getChannelSchema = (t, channels, currentId = null) =>
   yup.object().shape({
@@ -8,11 +8,11 @@ export const getChannelSchema = (t, channels, currentId = null) =>
       .max(20, t('validation.usernameRange'))
       .required(t('validation.required'))
 
-      .test(
-        'profanity',
-        t('validation.profanity'),
-        value => !leoProfanity.check(value || ''),
-      )
+    // .test(
+    //   'profanity',
+    //   t('validation.profanity'),
+    //   value => !leoProfanity.check(value || ''),
+    // )
 
       .test(
         'unique',

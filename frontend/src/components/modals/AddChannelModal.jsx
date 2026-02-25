@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
+import leoProfanity from 'leo-profanity'
 import { useAddChannelMutation } from '../../services/api'
 import { setCurrentChannel } from '../../store/uiSlice'
 import { getChannelSchema } from '../../validation/channelSchema'
@@ -17,7 +18,15 @@ const AddChannelModal = ({ onClose }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const channel = await addChannel(values).unwrap()
+      const cleanedName = leoProfanity.clean(values.name).trim()
+
+      if (!cleanedName) {
+        toast.error(t('channels.nameError'))
+        return
+      }
+
+      const channel = await addChannel({ ...values, name: cleanedName }).unwrap()
+
       toast.success(t('channels.created'))
       dispatch(setCurrentChannel(channel.id))
       onClose()
