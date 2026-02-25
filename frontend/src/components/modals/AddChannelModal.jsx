@@ -51,8 +51,9 @@ const AddChannelModal = ({ onClose }) => {
                     name="name"
                     autoFocus
                     className="form-control"
+                    id="name"
                   />
-                  <label class="visually-hidden" for="name">Имя канала</label>
+                  <label class="visually-hidden" htmlFor="name">Имя канала</label>
                   <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
                     <ErrorMessage
                       name="name"
