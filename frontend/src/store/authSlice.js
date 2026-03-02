@@ -3,28 +3,26 @@ import { createSlice } from '@reduxjs/toolkit'
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    token: localStorage.getItem('token') || null,
-    username: localStorage.getItem('username') || null,
+    token: null,
+    username: null,
+    isLoading: true,
   },
   reducers: {
+    setCredentials: (state, action) => {
+      state.token = action.payload.token
+      state.username = action.payload.username
+      state.isLoading = false
+    },
     logout: (state) => {
       state.token = null
       state.username = null
-      localStorage.removeItem('token')
-      localStorage.removeItem('username')
+      state.isLoading = false
     },
-  },
-  extraReducers: (builder) => {
-    builder.addMatcher(
-      action =>
-        action.type?.startsWith('api/executeMutation') && action.payload?.token,
-      (state, action) => {
-        state.token = action.payload.token
-        state.username = action.payload.username
-      },
-    )
+    restoreSession: (state) => {
+      state.isLoading = false
+    },
   },
 })
 
-export const { logout } = authSlice.actions
+export const { setCredentials, logout, restoreSession } = authSlice.actions
 export default authSlice.reducer

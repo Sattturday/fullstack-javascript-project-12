@@ -4,10 +4,13 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getSignupSchema } from '../validation/signupSchema'
 import { useSignupMutation } from '../services/api'
+import { routes } from '../routes'
+import useAuth from '../hooks/useAuth'
 
 const Signup = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { login: loginUser } = useAuth()
   const [signup, { isLoading }] = useSignupMutation()
   const [submitError, setSubmitError] = useState(null)
 
@@ -22,9 +25,12 @@ const Signup = () => {
         password: values.password,
       }).unwrap()
 
-      if (result.token) {
-        navigate('/')
-      }
+      loginUser({
+        token: result.token,
+        username: result.username,
+      })
+
+      navigate(routes.home)
     }
     catch (err) {
       if (err.status === 409) {
@@ -162,7 +168,7 @@ const Signup = () => {
             <div className="card-footer p-4 text-center">
               <span>{t('auth.hasAccount')}</span>
               {' '}
-              <Link to="/login">{t('auth.login')}</Link>
+              <Link to={routes.login}>{t('auth.login')}</Link>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 import Header from './components/Header'
+import { routes } from './routes'
 
 function App() {
   return (
@@ -14,16 +15,16 @@ function App() {
         <main className="flex-grow-1 d-flex justify-content-center">
           <Routes>
             <Route
-              path="/"
+              path={routes.home}
               element={(
                 <ProtectedRoute>
                   <Home />
                 </ProtectedRoute>
               )}
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path={routes.login} element={<Login />} />
+            <Route path={routes.signup} element={<Signup />} />
+            <Route path={routes.notFound} element={<NotFound />} />
           </Routes>
         </main>
       </div>

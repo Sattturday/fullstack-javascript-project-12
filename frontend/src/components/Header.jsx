@@ -1,31 +1,24 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { logout } from '../store/authSlice'
+import { routes } from '../routes'
+import useAuth from '../hooks/useAuth'
 
 const Header = () => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const token = useSelector(state => state.auth.token)
-
-  const handleLogout = () => {
-    dispatch(logout())
-    navigate('/login')
-  }
+  const { logout, isAuthenticated } = useAuth()
 
   return (
     <nav className="shadow-sm navbar navbar-expand-lg navbar-light bg-white">
       <div className="container">
-        <Link className="navbar-brand  mb-0 h1" to="/">
+        <Link className="navbar-brand mb-0 h1" to={routes.home}>
           {t('header.brand')}
         </Link>
 
-        {token && (
+        {isAuthenticated && (
           <button
             type="button"
             className="btn btn-primary"
-            onClick={handleLogout}
+            onClick={logout}
           >
             {t('header.logout')}
           </button>

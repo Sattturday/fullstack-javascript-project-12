@@ -4,10 +4,13 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getLoginSchema } from '../validation/loginSchema'
 import { useLoginMutation } from '../services/api'
+import useAuth from '../hooks/useAuth'
+import { routes } from '../routes'
 
 const Login = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { login: loginUser } = useAuth()
   const [login, { isLoading }] = useLoginMutation()
   const [submitError, setSubmitError] = useState(null)
 
@@ -19,9 +22,12 @@ const Login = () => {
 
       const result = await login(values).unwrap()
 
-      if (result.token) {
-        navigate('/')
-      }
+      loginUser({
+        token: result.token,
+        username: result.username,
+      })
+
+      navigate(routes.home)
     }
     catch (err) {
       if (err.status === 401) {
@@ -131,9 +137,7 @@ const Login = () => {
             <div className="card-footer p-4 text-center">
               <span>{t('auth.noAccount')}</span>
               {' '}
-              <Link to="/signup">
-                {t('auth.signup')}
-              </Link>
+              <Link to={routes.signup}>{t('auth.signup')}</Link>
             </div>
           </div>
         </div>

@@ -1,23 +1,19 @@
-import PropTypes from 'prop-types'
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { Navigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
+import routes from '../routes'
 
 const ProtectedRoute = ({ children }) => {
-  const navigate = useNavigate()
-  const { token } = useSelector(state => state.auth)
+  const { isAuthenticated, isLoading } = useAuth()
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login')
-    }
-  }, [token, navigate])
+  if (isLoading) {
+    return null
+  }
 
-  return token ? children : null
-}
+  if (!isAuthenticated) {
+    return <Navigate to={routes.login} replace />
+  }
 
-ProtectedRoute.propTypes = {
-  children: PropTypes.node.isRequired,
+  return children
 }
 
 export default ProtectedRoute
