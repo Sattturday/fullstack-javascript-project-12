@@ -14,13 +14,17 @@ import App from './App'
 export default async function initApp() {
   const i18n = await createI18n()
 
-  const rollbar = new Rollbar({
-    accessToken: import.meta.env.VITE_ROLLBAR_TOKEN,
-    environment: import.meta.env.MODE,
-    captureUncaught: true,
-    captureUnhandledRejections: true,
-    enabled: Boolean(import.meta.env.VITE_ROLLBAR_TOKEN),
-  })
+  const hasToken = Boolean(import.meta.env.VITE_ROLLBAR_TOKEN)
+
+  const rollbar = hasToken
+    ? new Rollbar({
+        accessToken: import.meta.env.VITE_ROLLBAR_TOKEN,
+        environment: import.meta.env.MODE,
+        captureUncaught: true,
+        captureUnhandledRejections: true,
+        enabled: true,
+      })
+    : null
 
   const socket = createSocket()
 
@@ -30,20 +34,30 @@ export default async function initApp() {
 
   const store = createAppStore(socket)
 
+  const content = (
+    <SocketContext.Provider value={socket}>
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <App />
+          <ToastContainer position="top-right" autoClose={3000} />
+        </I18nextProvider>
+      </Provider>
+    </SocketContext.Provider>
+  )
+
   const AppWithProviders = () => (
     <StrictMode>
-      <RollbarProvider instance={rollbar}>
-        <ErrorBoundary>
-          <SocketContext.Provider value={socket}>
-            <Provider store={store}>
-              <I18nextProvider i18n={i18n}>
-                <App />
-                <ToastContainer position="top-right" autoClose={3000} />
-              </I18nextProvider>
-            </Provider>
-          </SocketContext.Provider>
-        </ErrorBoundary>
-      </RollbarProvider>
+      {rollbar
+        ? (
+            <RollbarProvider instance={rollbar}>
+              <ErrorBoundary>
+                {content}
+              </ErrorBoundary>
+            </RollbarProvider>
+          )
+        : (
+            content
+          )}
     </StrictMode>
   )
 
