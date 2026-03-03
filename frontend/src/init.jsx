@@ -21,7 +21,6 @@ export default async function initApp(socket) {
     enabled: Boolean(import.meta.env.VITE_ROLLBAR_TOKEN),
   })
 
-  leoProfanity.clearList()
   leoProfanity.add(leoProfanity.getDictionary('en'))
   leoProfanity.add(leoProfanity.getDictionary('ru'))
 
