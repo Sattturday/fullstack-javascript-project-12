@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import { Formik, Form, Field } from 'formik'
 import leoProfanity from 'leo-profanity'
 import {
   useGetChannelsQuery,
@@ -10,8 +10,6 @@ import {
 
 const ChatWindow = () => {
   const { t } = useTranslation()
-  const [text, setText] = useState('')
-
   const currentChannelId = useSelector(state => state.ui.currentChannelId)
   const username = useSelector(state => state.auth.username)
 
@@ -21,15 +19,10 @@ const ChatWindow = () => {
   const [sendMessage] = useAddMessageMutation()
 
   const currentChannel = channels.find(c => c.id === currentChannelId)
+  const currentMessages = messages.filter(m => m.channelId === currentChannelId)
 
-  const currentMessages = messages.filter(
-    m => m.channelId === currentChannelId,
-  )
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    const cleanedText = leoProfanity.clean(text).trim()
+  const handleSubmit = async (values, { resetForm }) => {
+    const cleanedText = leoProfanity.clean(values.text).trim()
     if (!cleanedText) return
 
     await sendMessage({
@@ -38,7 +31,7 @@ const ChatWindow = () => {
       username: username || 'user',
     })
 
-    setText('')
+    resetForm()
   }
 
   const formatMessageCount = (count) => {
@@ -60,12 +53,8 @@ const ChatWindow = () => {
 
         {/* Header */}
         <div className="bg-light mb-4 p-3 shadow-sm small">
-          <p className="m-0">
-            <b>{`# ${currentChannel?.name}`}</b>
-          </p>
-          <span className="text-muted">
-            {formatMessageCount(currentMessages.length)}
-          </span>
+          <p className="m-0"><b>{`# ${currentChannel?.name}`}</b></p>
+          <span className="text-muted">{formatMessageCount(currentMessages.length)}</span>
         </div>
 
         {/* Messages */}
@@ -82,30 +71,31 @@ const ChatWindow = () => {
 
         {/* Form */}
         <div className="mt-auto px-5 py-3">
-          <form onSubmit={handleSubmit} className="py-1 border rounded-2">
-            <div className="input-group">
-              <input
-                value={text}
-                onChange={e => setText(e.target.value)}
-                placeholder={t('chat.input.placeholder')}
-                className="border-0 p-0 ps-2 form-control"
-                aria-label={t('chat.input.ariaLabel')}
-              />
-              <button
-                type="submit"
-                disabled={!text?.trim()}
-                className="btn btn-group-vertical"
-              >
-                <i
-                  className="bi bi-arrow-right-square"
-                  style={{ fontSize: '20px' }}
-                />
-                <span className="visually-hidden">
-                  {t('chat.send')}
-                </span>
-              </button>
-            </div>
-          </form>
+          <Formik
+            initialValues={{ text: '' }}
+            onSubmit={handleSubmit}
+          >
+            {({ values }) => (
+              <Form className="py-1 border rounded-2">
+                <div className="input-group">
+                  <Field
+                    name="text"
+                    placeholder={t('chat.input.placeholder')}
+                    className="border-0 p-0 ps-2 form-control"
+                    aria-label={t('chat.input.ariaLabel')}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!values.text.trim()}
+                    className="btn btn-group-vertical"
+                  >
+                    <i className="bi bi-arrow-right-square" style={{ fontSize: '20px' }} />
+                    <span className="visually-hidden">{t('chat.send')}</span>
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </div>
 
       </div>
