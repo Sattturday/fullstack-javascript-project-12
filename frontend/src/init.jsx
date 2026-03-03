@@ -6,12 +6,11 @@ import leoProfanity from 'leo-profanity'
 import Rollbar from 'rollbar'
 import { Provider as RollbarProvider, ErrorBoundary } from '@rollbar/react'
 import createI18n from './services/createI18n'
-import { createSocket } from './services/createSocket'
 import { createAppStore } from './store'
 import SocketContext from './contexts/SocketContext'
 import App from './App'
 
-export default async function initApp() {
+export default async function initApp(socket) {
   const i18n = await createI18n()
 
   const rollbar = new Rollbar({
@@ -21,8 +20,6 @@ export default async function initApp() {
     captureUnhandledRejections: true,
     enabled: Boolean(import.meta.env.VITE_ROLLBAR_TOKEN),
   })
-
-  const socket = createSocket()
 
   leoProfanity.clearList()
   leoProfanity.add(leoProfanity.getDictionary('en'))
@@ -57,11 +54,5 @@ export default async function initApp() {
     </StrictMode>
   )
 
-  return {
-    App: AppWithProviders,
-    store,
-    i18n,
-    rollbar,
-    socket,
-  }
+  return { App: AppWithProviders }
 }
