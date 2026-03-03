@@ -14,17 +14,13 @@ import App from './App'
 export default async function initApp() {
   const i18n = await createI18n()
 
-  const hasToken = Boolean(import.meta.env.VITE_ROLLBAR_TOKEN)
-
-  const rollbar = hasToken
-    ? new Rollbar({
-        accessToken: import.meta.env.VITE_ROLLBAR_TOKEN,
-        environment: import.meta.env.MODE,
-        captureUncaught: true,
-        captureUnhandledRejections: true,
-        enabled: true,
-      })
-    : null
+  const rollbar = new Rollbar({
+    accessToken: import.meta.env.VITE_ROLLBAR_TOKEN,
+    environment: import.meta.env.MODE,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    enabled: Boolean(import.meta.env.VITE_ROLLBAR_TOKEN),
+  })
 
   const socket = createSocket()
 
@@ -47,7 +43,7 @@ export default async function initApp() {
 
   const AppWithProviders = () => (
     <StrictMode>
-      {rollbar
+      {import.meta.env.VITE_ROLLBAR_TOKEN
         ? (
             <RollbarProvider instance={rollbar}>
               <ErrorBoundary>
