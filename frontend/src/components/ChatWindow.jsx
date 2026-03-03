@@ -2,15 +2,21 @@ import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import leoProfanity from 'leo-profanity'
-import { useAddMessageMutation } from '../services/api'
+import {
+  useGetChannelsQuery,
+  useGetMessagesQuery,
+  useAddMessageMutation,
+} from '../services/api'
 
 const ChatWindow = () => {
   const { t } = useTranslation()
   const [text, setText] = useState('')
+
   const currentChannelId = useSelector(state => state.ui.currentChannelId)
-  const channels = useSelector(state => state.channels)
-  const messages = useSelector(state => state.messages)
   const username = useSelector(state => state.auth.username)
+
+  const { data: channels = [] } = useGetChannelsQuery()
+  const { data: messages = [] } = useGetMessagesQuery()
 
   const [sendMessage] = useAddMessageMutation()
 
@@ -76,10 +82,7 @@ const ChatWindow = () => {
 
         {/* Form */}
         <div className="mt-auto px-5 py-3">
-          <form
-            onSubmit={handleSubmit}
-            className="py-1 border rounded-2"
-          >
+          <form onSubmit={handleSubmit} className="py-1 border rounded-2">
             <div className="input-group">
               <input
                 value={text}
@@ -96,13 +99,15 @@ const ChatWindow = () => {
                 <i
                   className="bi bi-arrow-right-square"
                   style={{ fontSize: '20px' }}
-                >
-                </i>
-                <span className="visually-hidden">{t('chat.send')}</span>
+                />
+                <span className="visually-hidden">
+                  {t('chat.send')}
+                </span>
               </button>
             </div>
           </form>
         </div>
+
       </div>
     </div>
   )

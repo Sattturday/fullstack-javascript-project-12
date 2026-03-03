@@ -1,21 +1,25 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import { useRenameChannelMutation } from '../../services/api'
+import { useRenameChannelMutation, useGetChannelsQuery } from '../../services/api'
 import { getChannelSchema } from '../../validation/channelSchema'
 import PropTypes from 'prop-types'
 
 const RenameChannelModal = ({ channel, onClose }) => {
   const { t } = useTranslation()
-  const channels = useSelector(state => state.channels)
+
+  const { data: channels = [] } = useGetChannelsQuery()
   const [renameChannel] = useRenameChannelMutation()
 
   const schema = getChannelSchema(t, channels, channel.id)
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      await renameChannel({ id: channel.id, name: values.name }).unwrap()
+      await renameChannel({
+        id: channel.id,
+        name: values.name,
+      }).unwrap()
+
       toast.success(t('channels.renamed'))
       onClose()
     }
@@ -50,7 +54,9 @@ const RenameChannelModal = ({ channel, onClose }) => {
                     className="form-control"
                     id="name"
                   />
-                  <label className="visually-hidden" htmlFor="name">Имя канала</label>
+                  <label className="visually-hidden" htmlFor="name">
+                    {t('channels.name')}
+                  </label>
                   <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
                     <ErrorMessage
                       name="name"

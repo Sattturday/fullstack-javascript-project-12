@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'react-i18next'
-import { setMessages } from '../store/messagesSlice'
-import { setChannels } from '../store/channelsSlice'
 import { setCurrentChannel } from '../store/uiSlice'
 import { useGetChannelsQuery, useGetMessagesQuery } from '../services/api'
 import ChannelsList from '../components/ChannelsList'
@@ -17,27 +15,24 @@ const Home = () => {
   const dispatch = useDispatch()
 
   const { currentChannelId } = useSelector(state => state.ui)
-  const channels = useSelector(state => state.channels)
 
-  const { data: channelsData, error: channelsError } = useGetChannelsQuery()
-  const { data: messagesData, error: messagesError } = useGetMessagesQuery()
+  const {
+    data: channels = [],
+    error: channelsError,
+  } = useGetChannelsQuery()
+
+  const { error: messagesError } = useGetMessagesQuery()
 
   const [modal, setModal] = useState(null)
 
+  // обработка сетевых ошибок
   useEffect(() => {
     if (channelsError || messagesError) {
       toast.error(t('errors.connection'))
     }
   }, [channelsError, messagesError, t])
 
-  useEffect(() => {
-    if (channelsData) dispatch(setChannels(channelsData))
-  }, [channelsData, dispatch])
-
-  useEffect(() => {
-    if (messagesData) dispatch(setMessages(messagesData))
-  }, [messagesData, dispatch])
-
+  // установка дефолтного канала
   useEffect(() => {
     if (channels.length && !currentChannelId) {
       const general = channels.find(c => c.name === 'general')

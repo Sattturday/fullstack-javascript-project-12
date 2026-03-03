@@ -1,17 +1,18 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik'
-import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import leoProfanity from 'leo-profanity'
-import { useAddChannelMutation } from '../../services/api'
+import { useAddChannelMutation, useGetChannelsQuery } from '../../services/api'
+import { useDispatch } from 'react-redux'
 import { setCurrentChannel } from '../../store/uiSlice'
 import { getChannelSchema } from '../../validation/channelSchema'
 
 const AddChannelModal = ({ onClose }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const channels = useSelector(state => state.channels)
+
+  const { data: channels = [] } = useGetChannelsQuery()
   const [addChannel] = useAddChannelMutation()
 
   const schema = getChannelSchema(t, channels)
@@ -19,13 +20,9 @@ const AddChannelModal = ({ onClose }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const cleanedName = leoProfanity.clean(values.name).trim()
+      if (!cleanedName) return
 
-      if (!cleanedName) {
-        toast.error(t('channels.nameError'))
-        return
-      }
-
-      const channel = await addChannel({ ...values, name: cleanedName }).unwrap()
+      const channel = await addChannel({ name: cleanedName }).unwrap()
 
       toast.success(t('channels.created'))
       dispatch(setCurrentChannel(channel.id))
@@ -62,7 +59,9 @@ const AddChannelModal = ({ onClose }) => {
                     className="form-control"
                     id="name"
                   />
-                  <label className="visually-hidden" htmlFor="name">Имя канала</label>
+                  <label className="visually-hidden" htmlFor="name">
+                    {t('channels.name')}
+                  </label>
                   <div className="invalid-feedback d-block" style={{ minHeight: '18px' }}>
                     <ErrorMessage
                       name="name"

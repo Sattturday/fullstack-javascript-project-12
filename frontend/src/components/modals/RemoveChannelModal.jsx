@@ -1,22 +1,16 @@
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
-import { useDispatch } from 'react-redux'
 import { useRemoveChannelMutation } from '../../services/api'
-import { setCurrentChannel } from '../../store/uiSlice'
-import { removeChannelMessages } from '../../store/messagesSlice'
 
-const RemoveChannelModal = ({ channel, defaultChannelId, onClose }) => {
+const RemoveChannelModal = ({ channel, onClose }) => {
   const { t } = useTranslation()
-  const dispatch = useDispatch()
   const [removeChannel, { isLoading }] = useRemoveChannelMutation()
 
   const handleRemove = async () => {
     try {
       await removeChannel(channel.id).unwrap()
       toast.success(t('channels.removed'))
-      dispatch(removeChannelMessages(channel.id))
-      dispatch(setCurrentChannel(defaultChannelId))
       onClose()
     }
     catch (e) {
@@ -58,7 +52,6 @@ const RemoveChannelModal = ({ channel, defaultChannelId, onClose }) => {
 
 RemoveChannelModal.propTypes = {
   channel: PropTypes.object.isRequired,
-  defaultChannelId: PropTypes.number.isRequired,
   onClose: PropTypes.func.isRequired,
 }
 

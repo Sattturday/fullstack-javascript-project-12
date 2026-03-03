@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Dropdown, ButtonGroup } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import { useGetChannelsQuery } from '../services/api'
 import { setCurrentChannel } from '../store/uiSlice'
 import PropTypes from 'prop-types'
 
@@ -11,7 +12,8 @@ const ChannelsList = ({
 }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  const channels = useSelector(state => state.channels)
+
+  const { data: channels = [] } = useGetChannelsQuery()
   const currentChannelId = useSelector(state => state.ui.currentChannelId)
 
   return (
@@ -24,7 +26,7 @@ const ChannelsList = ({
           onClick={onAddChannel}
           className="p-0 text-primary btn btn-group-vertical border-0"
         >
-          <i className="bi bi-plus-square" style={{ fontSize: '20px' }}></i>
+          <i className="bi bi-plus-square" style={{ fontSize: '20px' }} />
           <span className="visually-hidden">+</span>
         </button>
       </div>

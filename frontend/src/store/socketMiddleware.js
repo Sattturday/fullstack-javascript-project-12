@@ -1,56 +1,61 @@
-import { addMessage, removeChannelMessages } from './messagesSlice'
-import {
-  addChannel,
-  removeChannel,
-  renameChannel,
-} from './channelsSlice'
 import { setCurrentChannel } from './uiSlice'
 import { logout } from './authSlice'
 import { api } from '../services/api'
 
 export const createSocketMiddleware = socket => (store) => {
   socket.on('newMessage', (payload) => {
-    store.dispatch(addMessage(payload))
+    store.dispatch(
+      api.util.updateQueryData('getMessages', undefined, (draft) => {
+        draft.push(payload)
+      }),
+    )
   })
 
   socket.on('newChannel', (payload) => {
-    store.dispatch(addChannel(payload))
+    store.dispatch(
+      api.util.updateQueryData('getChannels', undefined, (draft) => {
+        draft.push(payload)
+      }),
+    )
   })
 
   socket.on('removeChannel', ({ id }) => {
     const state = store.getState()
-    const { channels } = state
     const { currentChannelId } = state.ui
 
-    store.dispatch(removeChannel(id))
-    store.dispatch(removeChannelMessages(id))
+    store.dispatch(
+      api.util.updateQueryData('getChannels', undefined, (draft) => {
+        return draft.filter(c => c.id !== id)
+      }),
+    )
+
+    store.dispatch(
+      api.util.updateQueryData('getMessages', undefined, (draft) => {
+        return draft.filter(m => m.channelId !== id)
+      }),
+    )
 
     if (currentChannelId === id) {
+      const channels = api.endpoints.getChannels.select()(store.getState()).data || []
       const general = channels.find(c => c.name === 'general')
-      store.dispatch(
-        setCurrentChannel(general?.id || channels[0]?.id),
-      )
+      store.dispatch(setCurrentChannel(general?.id || channels[0]?.id))
     }
   })
 
   socket.on('renameChannel', (payload) => {
-    store.dispatch(renameChannel(payload))
+    store.dispatch(
+      api.util.updateQueryData('getChannels', undefined, (draft) => {
+        const channel = draft.find(c => c.id === payload.id)
+        if (channel) {
+          channel.name = payload.name
+        }
+      }),
+    )
   })
 
   return next => (action) => {
     const result = next(action)
 
-    // LOGIN SUCCESS
-    if (api.endpoints.login.matchFulfilled(action)) {
-      const token = localStorage.getItem('token')
-
-      if (token && !socket.connected) {
-        socket.auth = { token }
-        socket.connect()
-      }
-    }
-
-    // LOGOUT
     if (logout.match(action)) {
       socket.disconnect()
     }
